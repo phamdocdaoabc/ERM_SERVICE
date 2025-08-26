@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17.5
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=ermdb
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=12345678
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    networks:
+      - default
+
+  erm-service:
+    container_name: erm-service
+    build:
+      context: ./  # giữ nguyên backend của bạn
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - default
+
+networks:
+  default:
+    name: erm-service
+
+volumes:
+  postgres_data:

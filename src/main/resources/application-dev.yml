@@ -1,0 +1,30 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  devtools:
+    add-properties: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ermdb
+    username: admin
+    password: 12345678
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+# application-dev.yml
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+openapi:
+  service:
+    api-docs: erm-service
+    server: http://localhost:${server.port}
+    title: Erm service
+    version: 1.0.0
