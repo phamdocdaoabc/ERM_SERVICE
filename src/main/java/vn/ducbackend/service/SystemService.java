@@ -1,13 +1,18 @@
 package vn.ducbackend.service;
 
+import vn.ducbackend.domain.dto.SystemRequest;
+import vn.ducbackend.domain.dto.SystemResponse;
+
 import java.util.List;
 
 public interface SystemService {
-    RoleResponse createRole(RoleRequest roleRequest);
+    SystemResponse createSystem(SystemRequest roleRequest);
 
-    List<RoleResponse> getAll();
+    SystemResponse getSystem(Long id);
 
-    void delete(String name);
+    List<SystemResponse> getAllSystem();
 
-    RoleResponse updateRole(String Id, RoleUpdateRequest roleUpdateRequest);
+    void deleteSystem(Long id);
+
+    SystemResponse updateSystem(SystemResponse systemResponse);
 }

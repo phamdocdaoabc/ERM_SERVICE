@@ -7,4 +7,5 @@ import vn.ducbackend.domain.entity.CauseCategories;
 @Repository
 public interface CauseCategoryRepository extends JpaRepository<CauseCategories, Long> {
 
+    boolean existsByNameAndIdNot(String name, Long id);
 }

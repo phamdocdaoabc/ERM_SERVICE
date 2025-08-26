@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import vn.ducbackend.domain.enums.SourceCause;
+import vn.ducbackend.domain.enums.TypeCause;
 
 import java.time.LocalDateTime;
 
@@ -27,10 +29,12 @@ public class Causes {
     private String name;
 
     @Column(name = "type")
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TypeCause type;
 
     @Column(name = "source")
-    private String source;
+    @Enumerated(EnumType.STRING)
+    private SourceCause source;
 
     @Column(name = "cause_category_id")
     private Long causeCategoryId;

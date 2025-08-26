@@ -6,6 +6,9 @@ spring:
     name: erm-service
   profiles:
     active: @spring.profiles.active@
+  mvc:
+    servlet:
+      path: /api/v1
 
 management:
   endpoints:
