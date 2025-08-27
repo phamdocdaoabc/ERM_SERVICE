@@ -3,6 +3,10 @@ package vn.ducbackend.service.serviceImpl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.domain.entity.CauseCategories;
@@ -15,6 +19,7 @@ import vn.ducbackend.repository.SystemCauseCategoryRepository;
 import vn.ducbackend.repository.SystemRepository;
 import vn.ducbackend.service.CauseCategoryService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,10 +35,13 @@ public class CauseCategoryServiceImpl implements CauseCategoryService {
     // Thêm phân loại nguyên nhân
     @Override
     @Transactional
-    public CauseCategoryDTO createCauseCategory(CauseCategoryDetailRequest request) {
+    public CauseCategoryDetailResponse createCauseCategory(CauseCategoryDetailRequest request) {
         CauseCategories causeCategories = causeCategoryMapper.toCauseCategory(request);
-        causeCategoryRepository.save(causeCategories);
+        causeCategories = causeCategoryRepository.save(causeCategories);
+        // map
+        CauseCategoryDetailResponse dto = causeCategoryMapper.toDetailDTO(causeCategories);
         // Lưu quan hệ vào bảng trung gian
+        List<SystemCauseCategories> links = new ArrayList<>();
         for (Long systemId : request.getSystemIds()) {
             // optional: check systemId có tồn tại không
             if (!systemRepository.existsById(systemId)) {
@@ -43,9 +51,20 @@ public class CauseCategoryServiceImpl implements CauseCategoryService {
             SystemCauseCategories link = new SystemCauseCategories();
             link.setCauseCategoryId(causeCategories.getId());
             link.setSystemId(systemId);
-           systemCauseCategoryRepository.save(link);
+            link = systemCauseCategoryRepository.save(link);
+            links.add(link);
         }
-        return causeCategoryMapper.toCauseCategoryDto(causeCategories);
+        List<Long> systemIds = links.stream()
+                .map(SystemCauseCategories::getSystemId)
+                .toList();
+        List<Systems> systems = systemRepository.findAllById(systemIds);
+        // map systems sang DTO
+        List<SystemResponse> systemResponses = systems.stream()
+                .map(systemMapper::toSystemResponse)
+                .toList();
+        dto.setSystemIds(systemResponses);
+
+        return dto;
     }
 
     // lấy chi tiết phân loại nguyên nhân
@@ -67,6 +86,31 @@ public class CauseCategoryServiceImpl implements CauseCategoryService {
         CauseCategoryDetailResponse dto = causeCategoryMapper.toDetailDTO(causeCategories);
         dto.setSystemIds(systemResponses);
         return dto;
+    }
+
+    // all list causeCategories
+    @Override
+    public Page<CauseCategoryDetailResponse> getAllCauseCategory(Pageable pageable) {
+        var causeCategories = causeCategoryRepository.findAll(pageable);
+
+        return causeCategories.map(causeCategory -> {
+            // map sang DTO
+            CauseCategoryDetailResponse dto = causeCategoryMapper.toDetailDTO(causeCategory);
+
+            // lấy links
+            List<SystemCauseCategories> links = systemCauseCategoryRepository.findByCauseCategoryId(dto.getId());
+            List<Long> systemIds = links.stream()
+                    .map(SystemCauseCategories::getSystemId)
+                    .toList();
+
+            List<Systems> systems = systemRepository.findAllById(systemIds);
+            List<SystemResponse> systemResponses = systems.stream()
+                    .map(systemMapper::toSystemResponse)
+                    .toList();
+
+            dto.setSystemIds(systemResponses);
+            return dto;
+        });
     }
 
     @Override

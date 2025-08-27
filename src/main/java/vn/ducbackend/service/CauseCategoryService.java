@@ -1,14 +1,17 @@
 package vn.ducbackend.service;
 
-import vn.ducbackend.domain.dto.CauseCategoryDTO;
-import vn.ducbackend.domain.dto.CauseCategoryDetailRequest;
-import vn.ducbackend.domain.dto.CauseCategoryDetailResponse;
-import vn.ducbackend.domain.dto.CauseCategoryUpdateDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import vn.ducbackend.domain.dto.*;
+
+import java.util.List;
 
 public interface CauseCategoryService {
-    CauseCategoryDTO createCauseCategory(CauseCategoryDetailRequest request);
+    CauseCategoryDetailResponse createCauseCategory(CauseCategoryDetailRequest request);
 
     CauseCategoryDetailResponse getDetail(Long categoryId);
+
+    Page<CauseCategoryDetailResponse> getAllCauseCategory(Pageable pageable);
 
     CauseCategoryUpdateDTO updateCauseCategory(CauseCategoryUpdateDTO request);
 

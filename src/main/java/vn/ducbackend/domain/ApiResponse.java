@@ -1,4 +1,4 @@
-package vn.ducbackend.domain.dto;
+package vn.ducbackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

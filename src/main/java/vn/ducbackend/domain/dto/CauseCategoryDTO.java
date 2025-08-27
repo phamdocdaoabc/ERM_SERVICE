@@ -12,8 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CauseCategoryDTO {
-    private String code;
+    private Long id;
     private String name;
-    private String description;
-    private String note;
 }

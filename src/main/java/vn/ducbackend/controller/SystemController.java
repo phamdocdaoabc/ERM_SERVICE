@@ -3,7 +3,7 @@ package vn.ducbackend.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import vn.ducbackend.domain.dto.ApiResponse;
+import vn.ducbackend.domain.ApiResponse;
 import vn.ducbackend.domain.dto.SystemRequest;
 import vn.ducbackend.domain.dto.SystemResponse;
 import vn.ducbackend.service.SystemService;

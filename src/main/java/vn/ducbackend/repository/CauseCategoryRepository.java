@@ -1,5 +1,6 @@
 package vn.ducbackend.repository;
 
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vn.ducbackend.domain.entity.CauseCategories;
@@ -8,4 +9,6 @@ import vn.ducbackend.domain.entity.CauseCategories;
 public interface CauseCategoryRepository extends JpaRepository<CauseCategories, Long> {
 
     boolean existsByNameAndIdNot(String name, Long id);
+
+
 }
