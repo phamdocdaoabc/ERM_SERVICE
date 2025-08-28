@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.ducbackend.domain.ApiResponse;
+import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.service.CauseService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/cause")
@@ -16,10 +19,16 @@ import vn.ducbackend.service.CauseService;
 @Slf4j
 public class CauseController {
     private final CauseService causeService;
+
     @PostMapping
-    ApiResponse<CauseResponse> createCauseCategory(@RequestBody CauseRequest request) {
-        ApiResponse<CauseResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setData(causeService.createCause(request));
-        return apiResponse;
+    ApiResponse<IdsResponse<Long>> createCauseCategory(@RequestBody CauseRequest request) {
+        return ApiResponse.<IdsResponse<Long>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
+                .data(IdsResponse.<Long>builder()
+                        .id(causeService.create(request))
+                        .build()
+                )
+                .build();
     }
 }

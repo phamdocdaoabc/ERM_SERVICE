@@ -17,5 +17,5 @@ public class CauseCategoryDetailResponse {
     private String name;
     private String description;
     private String note;
-    private List<SystemResponse> systemIds;
+    private List<LinkResponse> systemIds;
 }

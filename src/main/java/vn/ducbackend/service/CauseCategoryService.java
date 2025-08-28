@@ -5,15 +5,16 @@ import org.springframework.data.domain.Pageable;
 import vn.ducbackend.domain.dto.*;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CauseCategoryService {
-    CauseCategoryDetailResponse createCauseCategory(CauseCategoryDetailRequest request);
+    Long create(CauseCategoryDetailRequest request);
 
-    CauseCategoryDetailResponse getDetail(Long categoryId);
+    CauseCategoryDetailResponse getCauseCategory(Long categoryId);
 
-    Page<CauseCategoryDetailResponse> getAllCauseCategory(Pageable pageable);
+    Page<CauseCategoryDetailResponse> getListCauseCategory(Pageable pageable, Set<Long> ids);
 
-    CauseCategoryUpdateDTO updateCauseCategory(CauseCategoryUpdateDTO request);
+    Long update(CauseCategoryUpdateDTO request);
 
-    void deleteCauseCategory(Long id);
+    void delete(Long id);
 }

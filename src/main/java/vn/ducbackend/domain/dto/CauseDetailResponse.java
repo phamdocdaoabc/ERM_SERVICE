@@ -20,7 +20,7 @@ public class CauseDetailResponse {
 
     private String name;
 
-    private List<SystemResponse> systemIds; // Hệ thống
+    private List<LinkResponse> systemIds; // Hệ thống
 
     private TypeCause type;
 

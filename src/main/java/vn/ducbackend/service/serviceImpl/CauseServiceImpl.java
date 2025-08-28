@@ -7,19 +7,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.ducbackend.domain.dto.CauseDetailResponse;
 import vn.ducbackend.domain.dto.CauseRequest;
-import vn.ducbackend.domain.dto.SystemResponse;
 import vn.ducbackend.domain.entity.Causes;
 import vn.ducbackend.domain.entity.SystemCauses;
-import vn.ducbackend.domain.entity.Systems;
+import vn.ducbackend.exception.customException.DuplicateException;
+import vn.ducbackend.exception.customException.NotFoundException;
 import vn.ducbackend.mapper.CauseMapper;
-import vn.ducbackend.mapper.SystemMapper;
+import vn.ducbackend.repository.CauseCategoryRepository;
 import vn.ducbackend.repository.CauseRepository;
 import vn.ducbackend.repository.SystemCauseRepository;
-import vn.ducbackend.repository.SystemRepository;
 import vn.ducbackend.service.CauseService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,44 +26,37 @@ import java.util.List;
 public class CauseServiceImpl implements CauseService {
     private final CauseRepository causeRepository;
     private final CauseMapper causeMapper;
-    private final SystemRepository systemRepository;
     private final SystemCauseRepository systemCauseRepository;
-    private final SystemMapper systemMapper;
+    private final CauseCategoryRepository causeCategoryRepository;
+
 
     @Override
-    public CauseDetailResponse createCause(CauseRequest causeRequest) {
-        Causes causes = causeMapper.toCauses(causeRequest);
-        causes = causeRepository.save(causes);
-
-        CauseDetailResponse dto = causeMapper.toDetailDTO(causes);
-        // Lưu quan hệ vào bảng trung gian
-        List<SystemCauses> links = new ArrayList<>();
-        for (Long systemId : causeRequest.getSystemIds()) {
-            // optional: check systemId có tồn tại không
-            if (!systemRepository.existsById(systemId)) {
-                throw new RuntimeException("System not found: " + systemId);
-            }
-
-            SystemCauses link = new SystemCauses();
-            link.setCauseId(causes.getId());
-            link.setSystemId(systemId);
-            systemCauseRepository.save(link);
-            links.add(link);
+    public Long create(CauseRequest causeRequest) {
+        // Check code trùng
+        if (causeRepository.existsCausesByCodeOrName(causeRequest.getName(), causeRequest.getCode())) {
+            throw new DuplicateException("Code [" + causeRequest.getCode() + "] or Name [" + causeRequest.getName() + "] already exists");
         }
-        List<Long> systemIds = links.stream()
-                .map(SystemCauses::getSystemId)
+        if(!causeCategoryRepository.existsById(causeRequest.getCauseCategoryId())){
+            throw new NotFoundException("CauseCategory not found with id: " + causeRequest.getCauseCategoryId());
+        }
+        Causes causes = causeMapper.toCauses(causeRequest);
+        causeRepository.save(causes);
+
+        // Lưu quan hệ vào bảng trung gian
+        List<SystemCauses> links = causeRequest.getSystemIds().stream()
+                .map(systemId -> {
+                    SystemCauses link = new SystemCauses();
+                    link.setCauseId(causes.getId());
+                    link.setSystemId(systemId);
+                    return link;
+                })
                 .toList();
-        List<Systems> systems = systemRepository.findAllById(systemIds);
-        // map systems sang DTO
-        List<SystemResponse> systemResponses = systems.stream()
-                .map(systemMapper::toSystemResponse)
-                .toList();
-        dto.setSystemIds(systemResponses);
-        return dto;
+        systemCauseRepository.saveAll(links);
+        return causes.getId();
     }
 
     @Override
-    public Page<CauseDetailResponse> getAllCauses(Pageable pageable) {
+    public Page<CauseDetailResponse> getListCause(Pageable pageable, Set<Long> ids) {
         return null;
     }
 
@@ -74,12 +66,12 @@ public class CauseServiceImpl implements CauseService {
     }
 
     @Override
-    public void deleteCause(Long id) {
+    public void delete(Long id) {
 
     }
 
     @Override
-    public CauseDetailResponse updateCause(CauseRequest causeRequest) {
+    public Long update(CauseRequest causeRequest) {
         return null;
     }
 }

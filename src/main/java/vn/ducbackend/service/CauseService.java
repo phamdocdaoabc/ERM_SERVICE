@@ -5,14 +5,16 @@ import org.springframework.data.domain.Pageable;
 import vn.ducbackend.domain.dto.CauseDetailResponse;
 import vn.ducbackend.domain.dto.CauseRequest;
 
-public interface CauseService {
-    CauseDetailResponse createCause(CauseRequest causeRequest);
+import java.util.Set;
 
-    Page<CauseDetailResponse> getAllCauses(Pageable pageable);
+public interface CauseService {
+    Long create(CauseRequest causeRequest);
+
+    Page<CauseDetailResponse> getListCause(Pageable pageable, Set<Long> ids);
 
     CauseDetailResponse getCause(Long id);
 
-    void deleteCause(Long id);
+    void delete(Long id);
 
-    CauseDetailResponse updateCause(CauseRequest causeRequest);
+    Long update(CauseRequest causeRequest);
 }

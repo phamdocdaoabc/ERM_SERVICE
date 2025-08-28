@@ -4,95 +4,82 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import vn.ducbackend.client.SystemClient;
 import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.domain.entity.CauseCategories;
 import vn.ducbackend.domain.entity.SystemCauseCategories;
-import vn.ducbackend.domain.entity.Systems;
+import vn.ducbackend.exception.customException.DuplicateException;
+import vn.ducbackend.exception.customException.NotFoundException;
 import vn.ducbackend.mapper.CauseCategoryMapper;
-import vn.ducbackend.mapper.SystemMapper;
 import vn.ducbackend.repository.CauseCategoryRepository;
 import vn.ducbackend.repository.SystemCauseCategoryRepository;
-import vn.ducbackend.repository.SystemRepository;
 import vn.ducbackend.service.CauseCategoryService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CauseCategoryServiceImpl implements CauseCategoryService {
     private final CauseCategoryRepository causeCategoryRepository;
-    private final SystemRepository systemRepository;
     private final SystemCauseCategoryRepository systemCauseCategoryRepository;
     private final CauseCategoryMapper causeCategoryMapper;
-    private final SystemMapper systemMapper;
+    private final SystemClient systemClient;
 
     // Thêm phân loại nguyên nhân
     @Override
     @Transactional
-    public CauseCategoryDetailResponse createCauseCategory(CauseCategoryDetailRequest request) {
-        CauseCategories causeCategories = causeCategoryMapper.toCauseCategory(request);
-        causeCategories = causeCategoryRepository.save(causeCategories);
-        // map
-        CauseCategoryDetailResponse dto = causeCategoryMapper.toDetailDTO(causeCategories);
-        // Lưu quan hệ vào bảng trung gian
-        List<SystemCauseCategories> links = new ArrayList<>();
-        for (Long systemId : request.getSystemIds()) {
-            // optional: check systemId có tồn tại không
-            if (!systemRepository.existsById(systemId)) {
-                throw new RuntimeException("System not found: " + systemId);
-            }
-
-            SystemCauseCategories link = new SystemCauseCategories();
-            link.setCauseCategoryId(causeCategories.getId());
-            link.setSystemId(systemId);
-            link = systemCauseCategoryRepository.save(link);
-            links.add(link);
+    public Long create(CauseCategoryDetailRequest request) {
+        // Check code trùng
+        if (causeCategoryRepository.existsCauseCategoriesByCodeOrName(request.getCode(), request.getName())) {
+            throw new DuplicateException("Code [" + request.getCode() + "] or Name [" + request.getName() + "] already exists");
         }
-        List<Long> systemIds = links.stream()
-                .map(SystemCauseCategories::getSystemId)
-                .toList();
-        List<Systems> systems = systemRepository.findAllById(systemIds);
-        // map systems sang DTO
-        List<SystemResponse> systemResponses = systems.stream()
-                .map(systemMapper::toSystemResponse)
-                .toList();
-        dto.setSystemIds(systemResponses);
 
-        return dto;
+        CauseCategories causeCategories = causeCategoryMapper.toCauseCategory(request);
+        causeCategoryRepository.save(causeCategories);
+
+        List<SystemCauseCategories> links = request.getSystemIds().stream()
+                .map(systemId -> {
+                    SystemCauseCategories link = new SystemCauseCategories();
+                    link.setCauseCategoryId(causeCategories.getId());
+                    link.setSystemId(systemId);
+                    return link;
+                })
+                .toList();
+        systemCauseCategoryRepository.saveAll(links);
+        return causeCategories.getId();
     }
 
     // lấy chi tiết phân loại nguyên nhân
     @Override
-    public CauseCategoryDetailResponse getDetail(Long categoryId) {
+    public CauseCategoryDetailResponse getCauseCategory(Long categoryId) {
         CauseCategories causeCategories = causeCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new NotFoundException("CauseCategory not found with id: " + categoryId));
 
         List<SystemCauseCategories> links = systemCauseCategoryRepository.findByCauseCategoryId(categoryId);
         List<Long> systemIds = links.stream()
                 .map(SystemCauseCategories::getSystemId)
                 .toList();
-        List<Systems> systems = systemRepository.findAllById(systemIds);
-        // map systems sang DTO
-        List<SystemResponse> systemResponses = systems.stream()
-                .map(systemMapper::toSystemResponse)
-                .toList();
+        // Call API System
+        List<LinkResponse> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
 
         CauseCategoryDetailResponse dto = causeCategoryMapper.toDetailDTO(causeCategories);
-        dto.setSystemIds(systemResponses);
+        dto.setSystemIds(systemResponseList);
         return dto;
     }
 
     // all list causeCategories
     @Override
-    public Page<CauseCategoryDetailResponse> getAllCauseCategory(Pageable pageable) {
-        var causeCategories = causeCategoryRepository.findAll(pageable);
-
+    public Page<CauseCategoryDetailResponse> getListCauseCategory(Pageable pageable, Set<Long> ids) {
+        Page<CauseCategories> causeCategories;
+        if (ids != null && !ids.isEmpty()) {
+            causeCategories = causeCategoryRepository.findByIdIn(ids, pageable);
+        } else {
+            causeCategories = causeCategoryRepository.findAll(pageable);
+        }
         return causeCategories.map(causeCategory -> {
             // map sang DTO
             CauseCategoryDetailResponse dto = causeCategoryMapper.toDetailDTO(causeCategory);
@@ -103,54 +90,51 @@ public class CauseCategoryServiceImpl implements CauseCategoryService {
                     .map(SystemCauseCategories::getSystemId)
                     .toList();
 
-            List<Systems> systems = systemRepository.findAllById(systemIds);
-            List<SystemResponse> systemResponses = systems.stream()
-                    .map(systemMapper::toSystemResponse)
-                    .toList();
+            // Call API System
+            List<LinkResponse> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
 
-            dto.setSystemIds(systemResponses);
+            dto.setSystemIds(systemResponseList);
             return dto;
         });
     }
 
     @Override
     @Transactional
-    public CauseCategoryUpdateDTO updateCauseCategory(CauseCategoryUpdateDTO request){
+    public Long update(CauseCategoryUpdateDTO request) {
         CauseCategories causeCategories = causeCategoryRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("CauseCategory not found with id: " + request.getId()));
+                .orElseThrow(() -> new NotFoundException("CauseCategory not found with id: " + request.getId()));
 
         // check trùng tên
         if (causeCategoryRepository.existsByNameAndIdNot(request.getName(), request.getId())) {
-            throw new RuntimeException("CauseCategory with name '" + request.getName() + "' already exists.");
+            throw new DuplicateException("CauseCategory with name '" + request.getName() + "' already exists.");
         }
 
         causeCategoryMapper.updateCauseCategoryFromDto(request, causeCategories);
-        causeCategories = causeCategoryRepository.save(causeCategories);
+        causeCategoryRepository.save(causeCategories);
 
         // Xóa các mapping cũ trước khi thêm mới để tránh trùng (nếu yêu cầu business cần)
         systemCauseCategoryRepository.deleteByCauseCategoryId(request.getId());
 
-        for (Long systemId : request.getSystemIds()){
-            if (!systemRepository.existsById(systemId)){
-                throw new RuntimeException("System not found: "+systemId);
-            }
-            SystemCauseCategories link = new SystemCauseCategories();
-            link.setCauseCategoryId(causeCategories.getId());
-            link.setSystemId(systemId);
-            systemCauseCategoryRepository.save(link);
-        }
+        List<SystemCauseCategories> links = request.getSystemIds().stream()
+                .map(systemId -> {
+                    SystemCauseCategories link = new SystemCauseCategories();
+                    link.setCauseCategoryId(causeCategories.getId());
+                    link.setSystemId(systemId);
+                    return link;
+                })
+                .toList();
+        systemCauseCategoryRepository.saveAll(links);
         // Trả về DTO đã update (có thể dùng mapper hoặc build thủ công)
-        return causeCategoryMapper.toUpdateDto(causeCategories, request.getSystemIds());
+        return causeCategories.getId();
     }
 
     @Override
     @Transactional
-    public void deleteCauseCategory(Long id) {
+    public void delete(Long id) {
         // Kiểm tra tồn tại
         if (!causeCategoryRepository.existsById(id)) {
             throw new RuntimeException("CauseCategory not found with id: " + id);
         }
-
         // Xóa mapping trước
         systemCauseCategoryRepository.deleteByCauseCategoryId(id);
 

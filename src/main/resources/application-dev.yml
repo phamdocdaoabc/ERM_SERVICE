@@ -16,6 +16,11 @@ spring:
       ddl-auto: none
     show-sql: false
 
+# Feign Client
+system:
+  service:
+    url: https://uaa-new.dev.apusplatform.com
+
 # application-dev.yml
 springdoc:
   api-docs:

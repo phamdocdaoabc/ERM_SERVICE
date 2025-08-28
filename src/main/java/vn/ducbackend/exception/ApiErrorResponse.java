@@ -1,4 +1,4 @@
-package vn.ducbackend.domain;
+package vn.ducbackend.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -9,8 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ApiResponse<T> {
+public class ApiErrorResponse<T> {
     private String message;
     private String traceId;
-    private T data;
+    private T errorCodes;
 }

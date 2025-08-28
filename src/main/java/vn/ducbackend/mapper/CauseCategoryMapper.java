@@ -5,7 +5,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.domain.entity.CauseCategories;
-import vn.ducbackend.domain.entity.Systems;
 
 import java.util.List;
 

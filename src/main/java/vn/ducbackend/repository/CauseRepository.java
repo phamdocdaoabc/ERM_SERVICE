@@ -7,4 +7,5 @@ import vn.ducbackend.domain.entity.Causes;
 @Repository
 public interface CauseRepository extends JpaRepository<Causes, Long> {
 
+    boolean existsCausesByCodeOrName(String code, String name);
 }

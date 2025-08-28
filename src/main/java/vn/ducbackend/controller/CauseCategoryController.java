@@ -1,5 +1,6 @@
 package vn.ducbackend.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -8,11 +9,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import vn.ducbackend.domain.ApiResponse;
+import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
 import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.service.CauseCategoryService;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/cause-categories")
@@ -21,18 +25,24 @@ import java.util.List;
 public class CauseCategoryController {
 
     private final CauseCategoryService causeCategoryService;
+
     // API tạo mới cause category
     @PostMapping
-    ApiResponse<CauseCategoryDetailResponse> createCauseCategory(@RequestBody CauseCategoryDetailRequest request) {
-        ApiResponse<CauseCategoryDetailResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setData(causeCategoryService.createCauseCategory(request));
-        return apiResponse;
+    ApiResponse<IdsResponse<Long>> createCauseCategory(@RequestBody @Valid CauseCategoryDetailRequest request) {
+        return ApiResponse.<IdsResponse<Long>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
+                .data(IdsResponse.<Long>builder()
+                        .id(causeCategoryService.create(request))
+                        .build()
+                )
+                .build();
     }
 
     // API lấy chi tiết cause category theo id
     @GetMapping()
     ApiResponse<CauseCategoryDetailResponse> getDetail(@RequestParam Long id) {
-        CauseCategoryDetailResponse response = causeCategoryService.getDetail(id);
+        CauseCategoryDetailResponse response = causeCategoryService.getCauseCategory(id);
         return ApiResponse.<CauseCategoryDetailResponse>builder()
                 .data(response)
                 .build();
@@ -42,10 +52,10 @@ public class CauseCategoryController {
     // Nhận tham số phân trang từ request (page, size, sort)
     @GetMapping("/list")
     public ApiResponse<PageResponse<CauseCategoryDetailResponse>> getAll(
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) Set<Long> ids
     ) {
-        Page<CauseCategoryDetailResponse> pageResult = causeCategoryService.getAllCauseCategory(pageable);
-
+        Page<CauseCategoryDetailResponse> pageResult = causeCategoryService.getListCauseCategory(pageable, ids);
         // map sang response chuẩn của bạn
         PageResponse<CauseCategoryDetailResponse> response = PageResponse.<CauseCategoryDetailResponse>builder()
                 .content(pageResult.getContent())
@@ -65,15 +75,26 @@ public class CauseCategoryController {
 
     // API chỉnh sửa
     @PutMapping
-    ApiResponse<CauseCategoryUpdateDTO>  updateCauseCategory(@RequestBody CauseCategoryUpdateDTO request){
-        return ApiResponse.<CauseCategoryUpdateDTO>builder()
-                .data(causeCategoryService.updateCauseCategory(request))
-                .build();
+    ApiResponse<IdsResponse<Long>> updateCauseCategory(@RequestBody @Valid CauseCategoryUpdateDTO request) {
+        try {
+            return ApiResponse.<IdsResponse<Long>>builder()
+                    .message("Successfully")
+                    .traceId(UUID.randomUUID().toString())
+                    .data(IdsResponse.<Long>builder()
+                            .id(causeCategoryService.update(request))
+                            .build()
+                    )
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<IdsResponse<Long>>builder()
+                    .message("Error : " + e.getMessage())
+                    .build();
+        }
     }
 
     @DeleteMapping()
-    ApiResponse<String> deleteCauseCategory(@RequestParam Long id){
-        causeCategoryService.deleteCauseCategory(id);
+    ApiResponse<String> deleteCauseCategory(@RequestParam Long id) {
+        causeCategoryService.delete(id);
         return ApiResponse.<String>builder()
                 .data("Delete Cause Category Scuccessfully")
                 .build();
