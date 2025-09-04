@@ -9,5 +9,7 @@ import java.util.List;
 
 @Repository
 public interface SystemCauseRepository extends JpaRepository<SystemCauses, Long> {
+    List<SystemCauses> findByCauseId(Long causeId);
 
+    void deleteByCauseId(Long causeId);
 }

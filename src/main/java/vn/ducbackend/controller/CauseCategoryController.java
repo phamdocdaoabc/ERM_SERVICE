@@ -28,7 +28,7 @@ public class CauseCategoryController {
 
     // API tạo mới cause category
     @PostMapping
-    ApiResponse<IdsResponse<Long>> createCauseCategory(@RequestBody @Valid CauseCategoryDetailRequest request) {
+    ApiResponse<IdsResponse<Long>> create(@RequestBody @Valid CauseCategoryDetailRequest request) {
         return ApiResponse.<IdsResponse<Long>>builder()
                 .message("Successfully")
                 .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
@@ -41,7 +41,7 @@ public class CauseCategoryController {
 
     // API lấy chi tiết cause category theo id
     @GetMapping()
-    ApiResponse<CauseCategoryDetailResponse> getDetail(@RequestParam Long id) {
+    ApiResponse<CauseCategoryDetailResponse> getCauseCategory(@RequestParam Long id) {
         CauseCategoryDetailResponse response = causeCategoryService.getCauseCategory(id);
         return ApiResponse.<CauseCategoryDetailResponse>builder()
                 .data(response)
@@ -51,7 +51,7 @@ public class CauseCategoryController {
     // API list all cause category
     // Nhận tham số phân trang từ request (page, size, sort)
     @GetMapping("/list")
-    public ApiResponse<PageResponse<CauseCategoryDetailResponse>> getAll(
+    public ApiResponse<PageResponse<CauseCategoryDetailResponse>> getListCauseCategory(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) Set<Long> ids
     ) {
@@ -75,28 +75,52 @@ public class CauseCategoryController {
 
     // API chỉnh sửa
     @PutMapping
-    ApiResponse<IdsResponse<Long>> updateCauseCategory(@RequestBody @Valid CauseCategoryUpdateDTO request) {
-        try {
-            return ApiResponse.<IdsResponse<Long>>builder()
-                    .message("Successfully")
-                    .traceId(UUID.randomUUID().toString())
-                    .data(IdsResponse.<Long>builder()
-                            .id(causeCategoryService.update(request))
-                            .build()
-                    )
-                    .build();
-        } catch (Exception e) {
-            return ApiResponse.<IdsResponse<Long>>builder()
-                    .message("Error : " + e.getMessage())
-                    .build();
-        }
+    ApiResponse<IdsResponse<Long>> update(@RequestBody @Valid CauseCategoryUpdateDTO request) {
+        return ApiResponse.<IdsResponse<Long>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString())
+                .data(IdsResponse.<Long>builder()
+                        .id(causeCategoryService.update(request))
+                        .build()
+                )
+                .build();
     }
 
     @DeleteMapping()
-    ApiResponse<String> deleteCauseCategory(@RequestParam Long id) {
+    ApiResponse<String> delete(@RequestParam Long id) {
         causeCategoryService.delete(id);
         return ApiResponse.<String>builder()
                 .data("Delete Cause Category Scuccessfully")
                 .build();
     }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<CauseCategoryDetailResponse>> getAll(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long systemId
+    ) {
+        CauseCategorySearchRequest request = new CauseCategorySearchRequest();
+        request.setCode(code);
+        request.setName(name);
+        request.setSystemId(systemId);
+        Page<CauseCategoryDetailResponse> pageResult =
+                causeCategoryService.searchCauseCategory(pageable, request);
+
+        PageResponse<CauseCategoryDetailResponse> response = PageResponse.<CauseCategoryDetailResponse>builder()
+                .content(pageResult.getContent())
+                .page(pageResult.getNumber())
+                .size(pageResult.getSize())
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .numberOfElements(pageResult.getNumberOfElements())
+                .sort(pageable.getSort().toString())
+                .build();
+
+        return ApiResponse.<PageResponse<CauseCategoryDetailResponse>>builder()
+                .data(response)
+                .build();
+    }
+
 }

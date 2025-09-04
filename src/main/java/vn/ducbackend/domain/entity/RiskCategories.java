@@ -4,19 +4,17 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import vn.ducbackend.domain.enums.SourceCause;
-import vn.ducbackend.domain.enums.TypeCause;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "causes")
+@Table(name = "risk_categories")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Causes {
+public class RiskCategories {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -28,19 +26,11 @@ public class Causes {
     @Column(name = "name", unique = true)
     private String name;
 
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    private TypeCause type;
+    @Column(name = "parent_id")
+    private Long parentId;
 
-    @Column(name = "source")
-    @Enumerated(EnumType.STRING)
-    private SourceCause source;
-
-    @Column(name = "cause_category_id")
-    private Long causeCategoryId;
-
-    @Column(name = "note")
-    private String note;
+    @Column(name = "description")
+    private String description;
 
     @Column(name = "is_active")
     private Boolean isActive;

@@ -1,8 +1,5 @@
 package vn.ducbackend.domain.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +13,9 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CauseRequest {
+public class CauseUpdateDTO {
+    private Long id;
+
     private String code;
 
     private String name;

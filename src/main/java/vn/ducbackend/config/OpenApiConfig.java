@@ -18,7 +18,7 @@ import java.util.List;
 @Configuration
 @Profile({"dev", "test"})
 public class OpenApiConfig {
-    // http://localhost:8080/swagger-ui/index.html
+    // http://localhost:8080/api/v1/swagger-ui/index.html
     @Bean
     public GroupedOpenApi publicApi(@Value("${openapi.service.api-docs}") String apiDocs) {
         return GroupedOpenApi.builder()

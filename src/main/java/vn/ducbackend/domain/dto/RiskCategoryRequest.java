@@ -1,13 +1,11 @@
 package vn.ducbackend.domain.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.ducbackend.domain.enums.SourceCause;
+import vn.ducbackend.domain.enums.TypeAttributeGroup;
 import vn.ducbackend.domain.enums.TypeCause;
 
 import java.util.List;
@@ -16,20 +14,17 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CauseRequest {
+public class RiskCategoryRequest {
     private String code;
 
     private String name;
 
-    private TypeCause type;
+    private List<Long> systemIds;
 
-    private SourceCause source;
+    private Long parentId;
 
-    private Long causeCategoryId;
-
-    private String note;
+    private String description;
 
     private Boolean isActive;
 
-    private List<Long> systemIds;
 }

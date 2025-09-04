@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import vn.ducbackend.domain.dto.CauseDetailResponse;
 import vn.ducbackend.domain.dto.CauseRequest;
+import vn.ducbackend.domain.dto.CauseUpdateDTO;
 
 import java.util.Set;
 
@@ -16,5 +17,5 @@ public interface CauseService {
 
     void delete(Long id);
 
-    Long update(CauseRequest causeRequest);
+    Long update(CauseUpdateDTO causeUpdateDTO);
 }

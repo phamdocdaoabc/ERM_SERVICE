@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CauseDetailResponse {
+public class RiskCategoryDetailResponse {
     private Long id;
 
     private String code;
@@ -22,13 +22,9 @@ public class CauseDetailResponse {
 
     private List<LinkResponse> systemIds; // Hệ thống
 
-    private TypeCause type;
+    private LinkResponse parent;
 
-    private LinkResponse causeCategory; // Phân loại nguyên nhân
-
-    private SourceCause source;
-
-    private String note;
+    private String description;
 
     private Boolean isActive;
 }

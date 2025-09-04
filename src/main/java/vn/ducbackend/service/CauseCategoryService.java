@@ -17,4 +17,6 @@ public interface CauseCategoryService {
     Long update(CauseCategoryUpdateDTO request);
 
     void delete(Long id);
+
+    Page<CauseCategoryDetailResponse> searchCauseCategory(Pageable pageable, CauseCategorySearchRequest request);
 }

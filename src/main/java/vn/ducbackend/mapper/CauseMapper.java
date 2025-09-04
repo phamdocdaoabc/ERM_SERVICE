@@ -1,10 +1,13 @@
 package vn.ducbackend.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-import vn.ducbackend.domain.dto.CauseDetailResponse;
-import vn.ducbackend.domain.dto.CauseRequest;
+import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.domain.entity.CauseCategories;
 import vn.ducbackend.domain.entity.Causes;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CauseMapper {
@@ -13,4 +16,11 @@ public interface CauseMapper {
     Causes toCauses(CauseRequest causeRequest);
 
     CauseDetailResponse toDetailDTO(Causes enity);
+
+    LinkResponse toLinkDTO(Causes causes);
+
+    // method hỗ trợ update từ DTO sang entity
+    void updateCausesFromDto(CauseUpdateDTO dto, @MappingTarget Causes entity);
+
+    CauseUpdateDTO toUpdateDTO(Causes causes, List<Long> systemIds);
 }

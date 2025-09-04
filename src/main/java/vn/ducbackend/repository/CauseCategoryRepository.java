@@ -4,6 +4,7 @@ package vn.ducbackend.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import vn.ducbackend.domain.entity.CauseCategories;
 
@@ -12,7 +13,7 @@ import java.util.Collection;
 import java.util.Set;
 
 @Repository
-public interface CauseCategoryRepository extends JpaRepository<CauseCategories, Long> {
+public interface CauseCategoryRepository extends JpaRepository<CauseCategories, Long>, JpaSpecificationExecutor<CauseCategories> {
 
     boolean existsByNameAndIdNot(String name, Long id);
 
