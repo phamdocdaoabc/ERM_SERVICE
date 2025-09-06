@@ -130,14 +130,35 @@ public class AttributeRisksServiceImpl implements AttributeRisksService {
             throw new DuplicateException("attributeRisk with name '" + request.getName() + "' already exists.");
         }
 
+        // If type = null => BUSINESS
+        if(request.getType() == null){
+            request.setType(TypeAttributeGroup.BUSINESS);
+        }
+
         attributeRiskMapper.updateAttributeRiskUpdateDTO(request, attributeRisks);
-        causeRepository.save(causes);
 
-        // Xóa các mapping cũ trước khi thêm mới để tránh trùng (nếu yêu cầu business cần)
-        systemCauseRepository.deleteByCauseId(causeUpdateDTO.getId());
-
-
-        // Trả về DTO đã update (có thể dùng mapper hoặc build thủ công)
-        return causes.getId();
+        // xử lý dataType & value theo displayType
+        if (request.getDisplayType().equals(DisplayType.TEXTBOX) || request.getDisplayType().equals(DisplayType.CHECKBOX)) {
+            attributeRisks.setDataType(request.getDataType());
+            // xóa value nếu trước đó có
+            attributeValueRiskRepository.deleteByAttributeRiskId(attributeRisks.getId());
+        } else if (request.getDisplayType().equals(DisplayType.SELECTBOX)) {
+            attributeRisks.setDataType(null); // clear
+            // clear value cũ
+            attributeValueRiskRepository.deleteByAttributeRiskId(attributeRisks.getId());
+            // insert value mới
+            if (request.getValues() != null) {
+                int sort = 1;
+                for (String v : request.getValues()) {
+                    AttributeValueRisks val = new AttributeValueRisks();
+                    val.setAttributeRiskId(attributeRisks.getId());
+                    val.setValue(v);
+                    val.setSortOrder(sort++);
+                    attributeValueRiskRepository.save(val);
+                }
+            }
+        }
+        attributeRiskRepository.save(attributeRisks);
+        return attributeRisks.getId();
     }
 }

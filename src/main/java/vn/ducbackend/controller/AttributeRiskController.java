@@ -14,6 +14,7 @@ import vn.ducbackend.domain.PageResponse;
 import vn.ducbackend.domain.dto.AttributeGroupRiskDTO;
 import vn.ducbackend.domain.dto.AttributeRiskRequest;
 import vn.ducbackend.domain.dto.AttributeRiskResponse;
+import vn.ducbackend.domain.dto.AttributeRiskUpdateDTO;
 import vn.ducbackend.service.AttributeRisksService;
 
 import java.util.Set;
@@ -78,6 +79,18 @@ public class AttributeRiskController {
         attributeRiskService.delete(id);
         return ApiResponse.<String>builder()
                 .data("Delete Cause Category Scuccessfully")
+                .build();
+    }
+
+    @PutMapping
+    ApiResponse<IdsResponse<Long>> update(@RequestBody @Valid AttributeRiskUpdateDTO request) {
+        return ApiResponse.<IdsResponse<Long>>builder()
+                .message("Update Successfully")
+                .traceId(UUID.randomUUID().toString())
+                .data(IdsResponse.<Long>builder()
+                        .id(attributeRiskService.update(request))
+                        .build()
+                )
                 .build();
     }
 

@@ -19,6 +19,7 @@ public interface AttributeRiskMapper {
     AttributeRiskResponse toDetailDTO(AttributeRisks entity);
 
     // method hỗ trợ update từ DTO sang entity
+    @Mapping(target = "dataType", ignore = true)
     void updateAttributeRiskUpdateDTO(AttributeRiskUpdateDTO dto, @MappingTarget AttributeRisks entity);
 
 }
