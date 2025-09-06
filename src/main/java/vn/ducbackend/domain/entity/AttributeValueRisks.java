@@ -9,33 +9,26 @@ import vn.ducbackend.domain.enums.TypeAttributeGroup;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attribute_group_risks")
+@Table(name = "attribute_value_risks")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AttributeGroupRisks {
+public class AttributeValueRisks {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "code", unique = true)
-    private String code;
+    @Column(name = "attribute_risk_id")
+    private Long attributeRiskId;
 
-    @Column(name = "name", unique = true)
-    private String name;
+    @Column(name = "value")
+    private String value;
 
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    private TypeAttributeGroup type;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "sort_order")
+    private Integer sortOrder;
 
     @Column(name = "created_at")
     @CreationTimestamp

@@ -4,18 +4,21 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import vn.ducbackend.domain.enums.DataType;
+import vn.ducbackend.domain.enums.DisplayType;
 import vn.ducbackend.domain.enums.TypeAttributeGroup;
+import vn.ducbackend.domain.enums.TypeCause;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attribute_group_risks")
+@Table(name = "attribute_risks")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AttributeGroupRisks {
+public class AttributeRisks {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -26,6 +29,17 @@ public class AttributeGroupRisks {
 
     @Column(name = "name", unique = true)
     private String name;
+
+    @Column(name = "attribute_group_id")
+    private Long attributeGroupId;
+
+    @Column(name = "display_type")
+    @Enumerated(EnumType.STRING)
+    private DisplayType displayType;
+
+    @Column(name = "data_type")
+    @Enumerated(EnumType.STRING)
+    private DataType dataType;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)

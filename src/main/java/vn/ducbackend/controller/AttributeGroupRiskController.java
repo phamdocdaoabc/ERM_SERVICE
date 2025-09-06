@@ -11,43 +11,52 @@ import org.springframework.web.bind.annotation.*;
 import vn.ducbackend.domain.ApiResponse;
 import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
-import vn.ducbackend.domain.dto.causes.CauseDetailResponse;
-import vn.ducbackend.domain.dto.causes.CauseRequest;
-import vn.ducbackend.domain.dto.causes.CauseUpdateDTO;
-import vn.ducbackend.service.CauseService;
+import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.service.AttributeGroupRiskService;
 
 import java.util.Set;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/cause")
+@RequestMapping("/attribute-group-risk")
 @RequiredArgsConstructor
 @Slf4j
-public class CauseController {
-    private final CauseService causeService;
+public class AttributeGroupRiskController {
 
+    private final AttributeGroupRiskService attributeGroupRiskService;
+
+    // API tạo mới cause category
     @PostMapping
-    ApiResponse<IdsResponse<Long>> create(@RequestBody CauseRequest request) {
+    ApiResponse<IdsResponse<Long>> create(@RequestBody @Valid AttributeGroupRiskRequest request) {
         return ApiResponse.<IdsResponse<Long>>builder()
                 .message("Successfully")
                 .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(IdsResponse.<Long>builder()
-                        .id(causeService.create(request))
+                        .id(attributeGroupRiskService.create(request))
                         .build()
                 )
                 .build();
     }
 
-    // API list all causes
+    // API lấy chi tiết risk category theo id
+    @GetMapping()
+    ApiResponse<AttributeGroupRiskDTO> getAttributeGroupRisk(@RequestParam Long id) {
+        AttributeGroupRiskDTO response = attributeGroupRiskService.getAttributeGroupRisk(id);
+        return ApiResponse.<AttributeGroupRiskDTO>builder()
+                .data(response)
+                .build();
+    }
+
+    // API list all cause category
     // Nhận tham số phân trang từ request (page, size, sort)
     @GetMapping("/list")
-    public ApiResponse<PageResponse<CauseDetailResponse>> getListCause(
+    public ApiResponse<PageResponse<AttributeGroupRiskDTO>> getListAttributeGroupRisk(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) Set<Long> ids
     ) {
-        Page<CauseDetailResponse> pageResult = causeService.getListCause(pageable, ids);
+        Page<AttributeGroupRiskDTO> pageResult = attributeGroupRiskService.getListAttributeGroupRisk(pageable, ids);
         // map sang response chuẩn của bạn
-        PageResponse<CauseDetailResponse> response = PageResponse.<CauseDetailResponse>builder()
+        PageResponse<AttributeGroupRiskDTO> response = PageResponse.<AttributeGroupRiskDTO>builder()
                 .content(pageResult.getContent())
                 .page(pageResult.getNumber())
                 .size(pageResult.getSize())
@@ -57,28 +66,20 @@ public class CauseController {
                 .numberOfElements(pageResult.getNumberOfElements())
                 .build();
 
-        return ApiResponse.<PageResponse<CauseDetailResponse>>builder()
+        return ApiResponse.<PageResponse<AttributeGroupRiskDTO>>builder()
                 .data(response)
                 .build();
     }
 
-    // API lấy chi tiết cause category theo id
-    @GetMapping()
-    ApiResponse<CauseDetailResponse> getCauses(@RequestParam Long id) {
-        CauseDetailResponse response = causeService.getCause(id);
-        return ApiResponse.<CauseDetailResponse>builder()
-                .data(response)
-                .build();
-    }
 
     // API chỉnh sửa
     @PutMapping
-    ApiResponse<IdsResponse<Long>> update(@RequestBody @Valid CauseUpdateDTO request) {
+    ApiResponse<IdsResponse<Long>> update(@RequestBody @Valid AttributeGroupRiskDTO request) {
         return ApiResponse.<IdsResponse<Long>>builder()
                 .message("Successfully")
                 .traceId(UUID.randomUUID().toString())
                 .data(IdsResponse.<Long>builder()
-                        .id(causeService.update(request))
+                        .id(attributeGroupRiskService.update(request))
                         .build()
                 )
                 .build();
@@ -86,9 +87,10 @@ public class CauseController {
 
     @DeleteMapping()
     ApiResponse<String> delete(@RequestParam Long id) {
-        causeService.delete(id);
+        attributeGroupRiskService.delete(id);
         return ApiResponse.<String>builder()
                 .data("Delete Cause Category Scuccessfully")
                 .build();
     }
+
 }

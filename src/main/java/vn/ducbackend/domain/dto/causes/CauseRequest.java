@@ -1,34 +1,32 @@
-package vn.ducbackend.domain.dto;
+package vn.ducbackend.domain.dto.causes;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import vn.ducbackend.domain.enums.SourceCause;
 import vn.ducbackend.domain.enums.TypeCause;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CauseDetailResponse {
-    private Long id;
-
+public class CauseRequest {
     private String code;
 
     private String name;
 
-    private List<LinkResponse> systemIds; // Hệ thống
-
     private TypeCause type;
 
-    private LinkResponse causeCategory; // Phân loại nguyên nhân
-
     private SourceCause source;
+
+    private Long causeCategoryId;
 
     private String note;
 
     private Boolean isActive;
+
+    private List<Long> systemIds;
 }

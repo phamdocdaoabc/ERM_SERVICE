@@ -3,7 +3,10 @@ package vn.ducbackend.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDTO;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailRequest;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailResponse;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryUpdateDTO;
 import vn.ducbackend.domain.entity.CauseCategories;
 
 import java.util.List;

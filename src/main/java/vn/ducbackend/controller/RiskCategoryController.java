@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import vn.ducbackend.domain.ApiResponse;
 import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
-import vn.ducbackend.domain.dto.*;
-import vn.ducbackend.service.CauseCategoryService;
+import vn.ducbackend.domain.dto.riskCategory.RiskCategoryDetailResponse;
+import vn.ducbackend.domain.dto.riskCategory.RiskCategoryRequest;
+import vn.ducbackend.domain.dto.riskCategory.RiskCategoryUpdateDTO;
 import vn.ducbackend.service.RiskCategoryService;
 
 import java.util.Set;
@@ -39,7 +40,7 @@ public class RiskCategoryController {
                 .build();
     }
 
-    // API lấy chi tiết cause category theo id
+    // API lấy chi tiết risk category theo id
     @GetMapping()
     ApiResponse<RiskCategoryDetailResponse> getRiskCategory(@RequestParam Long id) {
         RiskCategoryDetailResponse response = riskCategoryService.getRiskCategory(id);

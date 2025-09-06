@@ -1,4 +1,4 @@
-package vn.ducbackend.domain.dto;
+package vn.ducbackend.domain.dto.riskCategory;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.ducbackend.domain.enums.SourceCause;
+import vn.ducbackend.domain.enums.DataType;
+import vn.ducbackend.domain.enums.DisplayType;
+import vn.ducbackend.domain.enums.TypeAttributeGroup;
 import vn.ducbackend.domain.enums.TypeCause;
 
 import java.util.List;
@@ -16,20 +18,22 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CauseRequest {
+public class AttributeRiskRequest {
     private String code;
 
     private String name;
 
-    private TypeCause type;
+    private Long attributeGroupId;
 
-    private SourceCause source;
+    private DisplayType displayType; // Hình thức
 
-    private Long causeCategoryId;
+    private DataType dataType; // Loại dữ liệu
 
-    private String note;
+    private TypeAttributeGroup type;
+
+    private String description;
 
     private Boolean isActive;
 
-    private List<Long> systemIds;
+    private List<String> values; // nếu selectbox, gửi danh sách value
 }

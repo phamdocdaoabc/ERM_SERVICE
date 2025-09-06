@@ -1,9 +1,10 @@
-package vn.ducbackend.domain.dto;
+package vn.ducbackend.domain.dto.causesCategory;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.ducbackend.domain.dto.LinkResponse;
 
 import java.util.List;
 

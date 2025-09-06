@@ -4,7 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 import vn.ducbackend.domain.dto.*;
-import vn.ducbackend.domain.entity.CauseCategories;
+import vn.ducbackend.domain.dto.causes.CauseDetailResponse;
+import vn.ducbackend.domain.dto.causes.CauseRequest;
+import vn.ducbackend.domain.dto.causes.CauseUpdateDTO;
 import vn.ducbackend.domain.entity.Causes;
 
 import java.util.List;

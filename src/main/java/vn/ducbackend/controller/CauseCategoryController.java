@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import vn.ducbackend.domain.ApiResponse;
 import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
-import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailRequest;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailResponse;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategorySearchRequest;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryUpdateDTO;
 import vn.ducbackend.service.CauseCategoryService;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 

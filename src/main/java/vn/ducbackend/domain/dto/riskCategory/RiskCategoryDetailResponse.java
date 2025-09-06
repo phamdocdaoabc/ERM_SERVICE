@@ -1,11 +1,10 @@
-package vn.ducbackend.domain.dto;
+package vn.ducbackend.domain.dto.riskCategory;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.ducbackend.domain.enums.SourceCause;
-import vn.ducbackend.domain.enums.TypeCause;
+import vn.ducbackend.domain.dto.LinkResponse;
 
 import java.util.List;
 

@@ -8,9 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.ducbackend.client.SystemClient;
 import vn.ducbackend.domain.dto.*;
-import vn.ducbackend.domain.entity.CauseCategories;
+import vn.ducbackend.domain.dto.riskCategory.RiskCategoryDetailResponse;
+import vn.ducbackend.domain.dto.riskCategory.RiskCategoryRequest;
+import vn.ducbackend.domain.dto.riskCategory.RiskCategoryUpdateDTO;
 import vn.ducbackend.domain.entity.RiskCategories;
-import vn.ducbackend.domain.entity.SystemCauseCategories;
 import vn.ducbackend.domain.entity.SystemRiskCategories;
 import vn.ducbackend.exception.customException.DuplicateException;
 import vn.ducbackend.exception.customException.NotFoundException;
@@ -76,6 +77,12 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
             List<LinkResponse> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
 
             dto.setSystemIds(systemResponseList);
+            if(riskCategory.getParentId() != null){
+                RiskCategories parentRisk = riskCategoryRepository.findById(riskCategory.getParentId())
+                        .orElseThrow(() -> new NotFoundException("RiskCategory not found with id: " + riskCategory.getParentId()));
+                LinkResponse parentLink = riskCategoryMapper.toLinkDTO(parentRisk);
+                dto.setParent(parentLink);
+            }
             return dto;
         });
     }
@@ -94,10 +101,17 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
 
         RiskCategoryDetailResponse dto = riskCategoryMapper.toDetailDTO(riskCategories);
         dto.setSystemIds(systemResponseList);
+        if(riskCategories.getParentId() != null){
+            RiskCategories parentRisk = riskCategoryRepository.findById(riskCategories.getParentId())
+                    .orElseThrow(() -> new NotFoundException("RiskCategory not found with id: " + riskCategories.getParentId()));
+            LinkResponse parentLink = riskCategoryMapper.toLinkDTO(parentRisk);
+            dto.setParent(parentLink);
+        }
         return dto;
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         // Kiểm tra tồn tại
         if (!riskCategoryRepository.existsById(id)) {
@@ -111,6 +125,7 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
     }
 
     @Override
+    @Transactional
     public Long update(RiskCategoryUpdateDTO request) {
         RiskCategories riskCategories = riskCategoryRepository.findById(request.getId())
                 .orElseThrow(() -> new NotFoundException("Risk category not found with id: " + request.getId()));

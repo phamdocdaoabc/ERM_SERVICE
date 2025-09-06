@@ -2,9 +2,11 @@ package vn.ducbackend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailRequest;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailResponse;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategorySearchRequest;
+import vn.ducbackend.domain.dto.causesCategory.CauseCategoryUpdateDTO;
 
-import java.util.List;
 import java.util.Set;
 
 public interface CauseCategoryService {
