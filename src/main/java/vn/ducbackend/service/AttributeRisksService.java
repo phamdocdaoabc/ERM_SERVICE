@@ -2,11 +2,9 @@ package vn.ducbackend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import vn.ducbackend.domain.dto.AttributeRiskRequest;
-import vn.ducbackend.domain.dto.AttributeRiskResponse;
-import vn.ducbackend.domain.dto.AttributeRiskUpdateDTO;
-import vn.ducbackend.domain.dto.riskCategory.RiskCategoryDetailResponse;
-import vn.ducbackend.domain.dto.riskCategory.RiskCategoryUpdateDTO;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskRequest;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskResponse;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskUpdateDTO;
 
 import java.util.Set;
 

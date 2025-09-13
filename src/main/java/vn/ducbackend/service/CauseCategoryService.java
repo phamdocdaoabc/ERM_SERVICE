@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailRequest;
 import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailResponse;
 import vn.ducbackend.domain.dto.causesCategory.CauseCategorySearchRequest;
-import vn.ducbackend.domain.dto.causesCategory.CauseCategoryUpdateDTO;
 
 import java.util.Set;
 
@@ -16,7 +15,7 @@ public interface CauseCategoryService {
 
     Page<CauseCategoryDetailResponse> getListCauseCategory(Pageable pageable, Set<Long> ids);
 
-    Long update(CauseCategoryUpdateDTO request);
+    Long update(CauseCategoryDetailRequest request);
 
     void delete(Long id);
 

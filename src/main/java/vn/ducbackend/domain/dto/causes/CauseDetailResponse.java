@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.ducbackend.domain.dto.LinkResponse;
-import vn.ducbackend.domain.enums.SourceCause;
+import vn.ducbackend.domain.dto.BasicInfoDTO;
+import vn.ducbackend.domain.enums.Source;
 import vn.ducbackend.domain.enums.TypeCause;
 
 import java.util.List;
@@ -21,13 +21,13 @@ public class CauseDetailResponse {
 
     private String name;
 
-    private List<LinkResponse> systemIds; // Hệ thống
+    private List<BasicInfoDTO> systemIds; // Hệ thống
 
     private TypeCause type;
 
-    private LinkResponse causeCategory; // Phân loại nguyên nhân
+    private BasicInfoDTO causeCategory; // Phân loại nguyên nhân
 
-    private SourceCause source;
+    private Source source;
 
     private String note;
 

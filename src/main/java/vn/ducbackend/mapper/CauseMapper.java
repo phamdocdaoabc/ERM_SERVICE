@@ -7,7 +7,7 @@ import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.domain.dto.causes.CauseDetailResponse;
 import vn.ducbackend.domain.dto.causes.CauseRequest;
 import vn.ducbackend.domain.dto.causes.CauseUpdateDTO;
-import vn.ducbackend.domain.entity.Causes;
+import vn.ducbackend.domain.entity.Cause;
 
 import java.util.List;
 
@@ -15,14 +15,14 @@ import java.util.List;
 public interface CauseMapper {
     CauseMapper INSTANCE = Mappers.getMapper(CauseMapper.class);
 
-    Causes toCauses(CauseRequest causeRequest);
+    Cause toCauses(CauseRequest causeRequest);
 
-    CauseDetailResponse toDetailDTO(Causes enity);
+    CauseDetailResponse toDetailDTO(Cause enity);
 
-    LinkResponse toLinkDTO(Causes causes);
+    BasicInfoDTO toLinkDTO(Cause cause);
 
     // method hỗ trợ update từ DTO sang entity
-    void updateCausesFromDto(CauseUpdateDTO dto, @MappingTarget Causes entity);
+    void updateCausesFromDto(CauseUpdateDTO dto, @MappingTarget Cause entity);
 
-    CauseUpdateDTO toUpdateDTO(Causes causes, List<Long> systemIds);
+    CauseUpdateDTO toUpdateDTO(Cause cause, List<Long> systemIds);
 }

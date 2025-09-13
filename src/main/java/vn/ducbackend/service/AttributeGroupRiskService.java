@@ -2,7 +2,8 @@ package vn.ducbackend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.domain.dto.attributeGroupRisk.AttributeGroupRiskDTO;
+import vn.ducbackend.domain.dto.attributeGroupRisk.AttributeGroupRiskRequest;
 
 import java.util.Set;
 

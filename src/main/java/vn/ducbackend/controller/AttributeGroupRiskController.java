@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import vn.ducbackend.domain.ApiResponse;
 import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
-import vn.ducbackend.domain.dto.*;
+import vn.ducbackend.domain.dto.attributeGroupRisk.AttributeGroupRiskDTO;
+import vn.ducbackend.domain.dto.attributeGroupRisk.AttributeGroupRiskRequest;
 import vn.ducbackend.service.AttributeGroupRiskService;
 
 import java.util.Set;
@@ -25,7 +26,6 @@ public class AttributeGroupRiskController {
 
     private final AttributeGroupRiskService attributeGroupRiskService;
 
-    // API tạo mới cause category
     @PostMapping
     ApiResponse<IdsResponse<Long>> create(@RequestBody @Valid AttributeGroupRiskRequest request) {
         return ApiResponse.<IdsResponse<Long>>builder()
@@ -38,16 +38,16 @@ public class AttributeGroupRiskController {
                 .build();
     }
 
-    // API lấy chi tiết risk category theo id
     @GetMapping()
     ApiResponse<AttributeGroupRiskDTO> getAttributeGroupRisk(@RequestParam Long id) {
         AttributeGroupRiskDTO response = attributeGroupRiskService.getAttributeGroupRisk(id);
         return ApiResponse.<AttributeGroupRiskDTO>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
 
-    // API list all cause category
     // Nhận tham số phân trang từ request (page, size, sort)
     @GetMapping("/list")
     public ApiResponse<PageResponse<AttributeGroupRiskDTO>> getListAttributeGroupRisk(
@@ -67,6 +67,8 @@ public class AttributeGroupRiskController {
                 .build();
 
         return ApiResponse.<PageResponse<AttributeGroupRiskDTO>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -89,6 +91,8 @@ public class AttributeGroupRiskController {
     ApiResponse<String> delete(@RequestParam Long id) {
         attributeGroupRiskService.delete(id);
         return ApiResponse.<String>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data("Delete Cause Category Scuccessfully")
                 .build();
     }

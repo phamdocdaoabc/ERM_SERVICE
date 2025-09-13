@@ -6,8 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.ducbackend.domain.dto.*;
-import vn.ducbackend.domain.entity.AttributeGroupRisks;
+import vn.ducbackend.domain.dto.attributeGroupRisk.AttributeGroupRiskDTO;
+import vn.ducbackend.domain.dto.attributeGroupRisk.AttributeGroupRiskRequest;
+import vn.ducbackend.domain.entity.AttributeGroupRisk;
 import vn.ducbackend.domain.enums.TypeAttributeGroup;
 import vn.ducbackend.exception.customException.DuplicateException;
 import vn.ducbackend.exception.customException.NotFoundException;
@@ -36,15 +37,15 @@ public class AttributeGroupRiskServiceImpl implements AttributeGroupRiskService 
             request.setType(TypeAttributeGroup.BUSINESS);
         }
 
-        AttributeGroupRisks attributeGroupRisks = attributeGroupRiskMapper.toAttributeGroupRisks(request);
-        attributeGroupRiskRepository.save(attributeGroupRisks);
+        AttributeGroupRisk attributeGroupRisk = attributeGroupRiskMapper.toAttributeGroupRisks(request);
+        attributeGroupRiskRepository.save(attributeGroupRisk);
 
-        return attributeGroupRisks.getId();
+        return attributeGroupRisk.getId();
     }
 
     @Override
     public Page<AttributeGroupRiskDTO> getListAttributeGroupRisk(Pageable pageable, Set<Long> ids) {
-        Page<AttributeGroupRisks> attributeGroupRisks;
+        Page<AttributeGroupRisk> attributeGroupRisks;
         if (ids != null && !ids.isEmpty()) {
             attributeGroupRisks = attributeGroupRiskRepository.findByIdIn(ids, pageable);
         } else {
@@ -59,10 +60,10 @@ public class AttributeGroupRiskServiceImpl implements AttributeGroupRiskService 
 
     @Override
     public AttributeGroupRiskDTO getAttributeGroupRisk(Long id) {
-        AttributeGroupRisks attributeGroupRisks = attributeGroupRiskRepository.findById(id)
+        AttributeGroupRisk attributeGroupRisk = attributeGroupRiskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("attributeGroup not found with id: " + id));
 
-        AttributeGroupRiskDTO dto = attributeGroupRiskMapper.toDetailDTO(attributeGroupRisks);
+        AttributeGroupRiskDTO dto = attributeGroupRiskMapper.toDetailDTO(attributeGroupRisk);
         return dto;
     }
 
@@ -71,7 +72,7 @@ public class AttributeGroupRiskServiceImpl implements AttributeGroupRiskService 
     public void delete(Long id) {
         // Kiểm tra tồn tại
         if (!attributeGroupRiskRepository.existsById(id)) {
-            throw new RuntimeException("attributeGroupRisk not found with id: " + id);
+            throw new NotFoundException("attributeGroupRisk not found with id: " + id);
         }
         // Delete
         attributeGroupRiskRepository.deleteById(id);
@@ -80,7 +81,7 @@ public class AttributeGroupRiskServiceImpl implements AttributeGroupRiskService 
     @Override
     @Transactional
     public Long update(AttributeGroupRiskDTO request) {
-        AttributeGroupRisks attributeGroupRisks = attributeGroupRiskRepository.findById(request.getId())
+        AttributeGroupRisk attributeGroupRisk = attributeGroupRiskRepository.findById(request.getId())
                 .orElseThrow(() -> new NotFoundException(" AttributeGroupRisk not found with id: " + request.getId()));
 
         // check trùng tên
@@ -88,8 +89,8 @@ public class AttributeGroupRiskServiceImpl implements AttributeGroupRiskService 
             throw new DuplicateException("AttributeGroupRisk with name '" + request.getName() + "' already exists.");
         }
 
-        attributeGroupRiskMapper.updateAttributeGroupRiskDTO(request, attributeGroupRisks);
-        attributeGroupRiskRepository.save(attributeGroupRisks);
-        return attributeGroupRisks.getId();
+        attributeGroupRiskMapper.updateAttributeGroupRiskDTO(request, attributeGroupRisk);
+        attributeGroupRiskRepository.save(attributeGroupRisk);
+        return attributeGroupRisk.getId();
     }
 }

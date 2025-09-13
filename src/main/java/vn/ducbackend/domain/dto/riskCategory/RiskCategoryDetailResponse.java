@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.ducbackend.domain.dto.LinkResponse;
+import vn.ducbackend.domain.dto.BasicInfoDTO;
 
 import java.util.List;
 
@@ -19,9 +19,9 @@ public class RiskCategoryDetailResponse {
 
     private String name;
 
-    private List<LinkResponse> systemIds; // Hệ thống
+    private List<BasicInfoDTO> systemIds; // Hệ thống
 
-    private LinkResponse parent;
+    private BasicInfoDTO parent;
 
     private String description;
 

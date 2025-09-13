@@ -6,18 +6,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-import vn.ducbackend.domain.entity.CauseCategories;
+import vn.ducbackend.domain.entity.CauseCategory;
 
-import java.nio.channels.FileChannel;
-import java.util.Collection;
 import java.util.Set;
 
 @Repository
-public interface CauseCategoryRepository extends JpaRepository<CauseCategories, Long>, JpaSpecificationExecutor<CauseCategories> {
+public interface CauseCategoryRepository extends JpaRepository<CauseCategory, Long>, JpaSpecificationExecutor<CauseCategory> {
 
     boolean existsByNameAndIdNot(String name, Long id);
 
     boolean existsCauseCategoriesByCodeOrName(String code, String name);
 
-    Page<CauseCategories> findByIdIn(Set<Long> ids, Pageable pageable);
+    Page<CauseCategory> findByIdIn(Set<Long> ids, Pageable pageable);
 }

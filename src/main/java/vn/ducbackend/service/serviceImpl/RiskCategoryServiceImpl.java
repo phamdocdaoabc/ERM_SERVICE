@@ -11,8 +11,8 @@ import vn.ducbackend.domain.dto.*;
 import vn.ducbackend.domain.dto.riskCategory.RiskCategoryDetailResponse;
 import vn.ducbackend.domain.dto.riskCategory.RiskCategoryRequest;
 import vn.ducbackend.domain.dto.riskCategory.RiskCategoryUpdateDTO;
-import vn.ducbackend.domain.entity.RiskCategories;
-import vn.ducbackend.domain.entity.SystemRiskCategories;
+import vn.ducbackend.domain.entity.RiskCategory;
+import vn.ducbackend.domain.entity.SystemRiskCategory;
 import vn.ducbackend.exception.customException.DuplicateException;
 import vn.ducbackend.exception.customException.NotFoundException;
 import vn.ducbackend.mapper.RiskCategoryMapper;
@@ -21,7 +21,9 @@ import vn.ducbackend.repository.SystemRiskCategoryRepository;
 import vn.ducbackend.service.RiskCategoryService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,24 +42,24 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
             throw new DuplicateException("Code [" + riskCategoryRequest.getCode() + "] or Name [" + riskCategoryRequest.getName() + "] already exists");
         }
 
-        RiskCategories riskCategories = riskCategoryMapper.toRiskCategories(riskCategoryRequest);
-        riskCategoryRepository.save(riskCategories);
+        RiskCategory riskCategory = riskCategoryMapper.toRiskCategories(riskCategoryRequest);
+        riskCategoryRepository.save(riskCategory);
 
-        List<SystemRiskCategories> links = riskCategoryRequest.getSystemIds().stream()
+        List<SystemRiskCategory> links = riskCategoryRequest.getSystemIds().stream()
                 .map(systemId -> {
-                    SystemRiskCategories link = new SystemRiskCategories();
-                    link.setRiskCategoryId(riskCategories.getId());
+                    SystemRiskCategory link = new SystemRiskCategory();
+                    link.setRiskCategoryId(riskCategory.getId());
                     link.setSystemId(systemId);
                     return link;
                 })
                 .toList();
         systemRiskCategoryRepository.saveAll(links);
-        return riskCategories.getId();
+        return riskCategory.getId();
     }
 
     @Override
     public Page<RiskCategoryDetailResponse> getListRiskCategory(Pageable pageable, Set<Long> ids) {
-        Page<RiskCategories> riskCategories;
+        Page<RiskCategory> riskCategories;
         if (ids != null && !ids.isEmpty()) {
             riskCategories = riskCategoryRepository.findByIdIn(ids, pageable);
         } else {
@@ -68,19 +70,20 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
             RiskCategoryDetailResponse dto = riskCategoryMapper.toDetailDTO(riskCategory);
 
             // lấy links
-            List<SystemRiskCategories> links = systemRiskCategoryRepository.findByRiskCategoryId(dto.getId());
-            List<Long> systemIds = links.stream()
-                    .map(SystemRiskCategories::getSystemId)
-                    .toList();
+            List<SystemRiskCategory> links = systemRiskCategoryRepository.findByRiskCategoryId(dto.getId());
+            Set<Long> systemIds = links.stream()
+                    .map(SystemRiskCategory::getSystemId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
             // Call API System
-            List<LinkResponse> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
+            List<BasicInfoDTO> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
 
             dto.setSystemIds(systemResponseList);
             if(riskCategory.getParentId() != null){
-                RiskCategories parentRisk = riskCategoryRepository.findById(riskCategory.getParentId())
+                RiskCategory parentRisk = riskCategoryRepository.findById(riskCategory.getParentId())
                         .orElseThrow(() -> new NotFoundException("RiskCategory not found with id: " + riskCategory.getParentId()));
-                LinkResponse parentLink = riskCategoryMapper.toLinkDTO(parentRisk);
+                BasicInfoDTO parentLink = riskCategoryMapper.toLinkDTO(parentRisk);
                 dto.setParent(parentLink);
             }
             return dto;
@@ -89,22 +92,23 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
 
     @Override
     public RiskCategoryDetailResponse getRiskCategory(Long id) {
-        RiskCategories riskCategories = riskCategoryRepository.findById(id)
+        RiskCategory riskCategory = riskCategoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("RiskCategory not found with id: " + id));
 
-        List<SystemRiskCategories> links = systemRiskCategoryRepository.findByRiskCategoryId(id);
-        List<Long> systemIds = links.stream()
-                .map(SystemRiskCategories::getSystemId)
-                .toList();
+        List<SystemRiskCategory> links = systemRiskCategoryRepository.findByRiskCategoryId(id);
+        Set<Long> systemIds = links.stream()
+                .map(SystemRiskCategory::getSystemId)
+                .filter(Objects::nonNull) // tránh null
+                .collect(Collectors.toSet());
         // Call API System
-        List<LinkResponse> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
+        List<BasicInfoDTO> systemResponseList = systemClient.getAllSystems(systemIds).getData().getContent();
 
-        RiskCategoryDetailResponse dto = riskCategoryMapper.toDetailDTO(riskCategories);
+        RiskCategoryDetailResponse dto = riskCategoryMapper.toDetailDTO(riskCategory);
         dto.setSystemIds(systemResponseList);
-        if(riskCategories.getParentId() != null){
-            RiskCategories parentRisk = riskCategoryRepository.findById(riskCategories.getParentId())
-                    .orElseThrow(() -> new NotFoundException("RiskCategory not found with id: " + riskCategories.getParentId()));
-            LinkResponse parentLink = riskCategoryMapper.toLinkDTO(parentRisk);
+        if(riskCategory.getParentId() != null){
+            RiskCategory parentRisk = riskCategoryRepository.findById(riskCategory.getParentId())
+                    .orElseThrow(() -> new NotFoundException("RiskCategory not found with id: " + riskCategory.getParentId()));
+            BasicInfoDTO parentLink = riskCategoryMapper.toLinkDTO(parentRisk);
             dto.setParent(parentLink);
         }
         return dto;
@@ -127,7 +131,7 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
     @Override
     @Transactional
     public Long update(RiskCategoryUpdateDTO request) {
-        RiskCategories riskCategories = riskCategoryRepository.findById(request.getId())
+        RiskCategory riskCategory = riskCategoryRepository.findById(request.getId())
                 .orElseThrow(() -> new NotFoundException("Risk category not found with id: " + request.getId()));
 
         // check trùng tên
@@ -135,22 +139,22 @@ public class RiskCategoryServiceImpl implements RiskCategoryService {
             throw new DuplicateException("Risk category with name '" + request.getName() + "' already exists.");
         }
 
-        riskCategoryMapper.updateRiskCategoryFromDto(request, riskCategories);
-        riskCategoryRepository.save(riskCategories);
+        riskCategoryMapper.updateRiskCategoryFromDto(request, riskCategory);
+        riskCategoryRepository.save(riskCategory);
 
         // Xóa các mapping cũ trước khi thêm mới để tránh trùng (nếu yêu cầu business cần)
         systemRiskCategoryRepository.deleteByRiskCategoryId(request.getId());
 
-        List<SystemRiskCategories> links = request.getSystemIds().stream()
+        List<SystemRiskCategory> links = request.getSystemIds().stream()
                 .map(systemId -> {
-                    SystemRiskCategories link = new SystemRiskCategories();
-                    link.setRiskCategoryId(riskCategories.getId());
+                    SystemRiskCategory link = new SystemRiskCategory();
+                    link.setRiskCategoryId(riskCategory.getId());
                     link.setSystemId(systemId);
                     return link;
                 })
                 .toList();
         systemRiskCategoryRepository.saveAll(links);
         // Trả về DTO đã update (có thể dùng mapper hoặc build thủ công)
-        return riskCategories.getId();
+        return riskCategory.getId();
     }
 }

@@ -13,7 +13,9 @@ import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
 import vn.ducbackend.domain.dto.causes.CauseDetailResponse;
 import vn.ducbackend.domain.dto.causes.CauseRequest;
+import vn.ducbackend.domain.dto.causes.CauseSearchRequest;
 import vn.ducbackend.domain.dto.causes.CauseUpdateDTO;
+import vn.ducbackend.domain.enums.Source;
 import vn.ducbackend.service.CauseService;
 
 import java.util.Set;
@@ -58,6 +60,8 @@ public class CauseController {
                 .build();
 
         return ApiResponse.<PageResponse<CauseDetailResponse>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -67,6 +71,8 @@ public class CauseController {
     ApiResponse<CauseDetailResponse> getCauses(@RequestParam Long id) {
         CauseDetailResponse response = causeService.getCause(id);
         return ApiResponse.<CauseDetailResponse>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -88,7 +94,44 @@ public class CauseController {
     ApiResponse<String> delete(@RequestParam Long id) {
         causeService.delete(id);
         return ApiResponse.<String>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data("Delete Cause Category Scuccessfully")
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<CauseDetailResponse>> getAll(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long causeCategoryId,
+            @RequestParam(required = false) Source source,
+            @RequestParam(required = false) Boolean isActive
+    ) {
+        CauseSearchRequest request = new CauseSearchRequest();
+        request.setCode(code);
+        request.setName(name);
+        request.setCauseCategoryId(causeCategoryId);
+        request.setSource(source);
+        request.setIsActive(isActive);
+        Page<CauseDetailResponse> pageResult =
+                causeService.searchCause(pageable, request);
+
+        PageResponse<CauseDetailResponse> response = PageResponse.<CauseDetailResponse>builder()
+                .content(pageResult.getContent())
+                .page(pageResult.getNumber())
+                .size(pageResult.getSize())
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .numberOfElements(pageResult.getNumberOfElements())
+                .sort(pageable.getSort().toString())
+                .build();
+
+        return ApiResponse.<PageResponse<CauseDetailResponse>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
+                .data(response)
                 .build();
     }
 }

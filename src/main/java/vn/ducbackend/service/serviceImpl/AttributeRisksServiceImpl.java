@@ -6,10 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.ducbackend.domain.dto.AttributeRiskRequest;
-import vn.ducbackend.domain.dto.AttributeRiskResponse;
-import vn.ducbackend.domain.dto.AttributeRiskUpdateDTO;
-import vn.ducbackend.domain.dto.LinkResponse;
+import vn.ducbackend.domain.dto.BasicInfoDTO;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskRequest;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskResponse;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskUpdateDTO;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeValueRiskDTO;
 import vn.ducbackend.domain.entity.*;
 import vn.ducbackend.domain.enums.DisplayType;
 import vn.ducbackend.domain.enums.TypeAttributeGroup;
@@ -23,8 +24,8 @@ import vn.ducbackend.repository.AttributeRiskRepository;
 import vn.ducbackend.repository.AttributeValueRiskRepository;
 import vn.ducbackend.service.AttributeRisksService;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,62 +47,100 @@ public class AttributeRisksServiceImpl implements AttributeRisksService {
         if(request.getType() == null){
             request.setType(TypeAttributeGroup.BUSINESS);
         }
-        AttributeRisks attributeRisks = attributeRiskMapper.toAttributeRisks(request);
-        if (request.getDisplayType().equals(DisplayType.TEXTBOX) || request.getDisplayType().equals(DisplayType.CHECKBOX)) {
+        AttributeRisk attributeRisk = attributeRiskMapper.toAttributeRisks(request);
+        if (request.getDisplayType().equals(DisplayType.TEXTBOX)) {
             if (request.getDataType() == null) {
-                throw new ValidationException("dataType required when display_type is Textbox/Checkbox");
+                throw new ValidationException("dataType required when display_type is Textbox");
             }
-            attributeRisks.setDataType(request.getDataType());
+            attributeRisk.setDataType(request.getDataType());
         } else {
-            attributeRisks.setDataType(null);
+            attributeRisk.setDataType(null);
         }
-        attributeRiskRepository.save(attributeRisks);
-        // If display type = selectbox
-        if (request.getDisplayType().equals(DisplayType.SELECTBOX)
+        attributeRiskRepository.save(attributeRisk);
+        // If display type = selectbox, CHECKBOX, RADIO, MULTI_SELECTBOX
+        if (!request.getDisplayType().equals(DisplayType.TEXTBOX)
                 && request.getValues() != null) {
             int sort = 1;
             for (String v : request.getValues()) {
-                AttributeValueRisks val = new AttributeValueRisks();
-                val.setAttributeRiskId(attributeRisks.getId());
+                AttributeValueRisk val = new AttributeValueRisk();
+                val.setAttributeRiskId(attributeRisk.getId());
                 val.setValue(v);
                 val.setSortOrder(sort++);
                 attributeValueRiskRepository.save(val);
             }
         }
-        return attributeRisks.getId();
+        return attributeRisk.getId();
     }
 
     @Override
     public Page<AttributeRiskResponse> getListAttributeRisk(Pageable pageable, Set<Long> ids) {
-        Page<AttributeRisks> attributeRisks;
+        Page<AttributeRisk> attributeRisks;
         if (ids != null && !ids.isEmpty()) {
             attributeRisks = attributeRiskRepository.findByIdIn(ids, pageable);
         } else {
             attributeRisks =  attributeRiskRepository.findAll(pageable);
         }
+        Set<Long> attributeIds = attributeRisks.stream()
+                .map(AttributeRisk::getId)
+                .filter(Objects::nonNull) // tránh null
+                .collect(Collectors.toSet());;
+
+        List<AttributeGroupRisk> attributeGroupRisks = attributeGroupRiskRepository.findByIdIn(attributeIds);
+
+        Map<Long, AttributeGroupRisk> groupRiskMap = attributeGroupRisks.stream()
+                .collect(Collectors.toMap(AttributeGroupRisk::getId, agr -> agr));
+
         return  attributeRisks.map(attributeRisk -> {
             // map sang DTO
             AttributeRiskResponse dto = attributeRiskMapper.toDetailDTO(attributeRisk);
-            AttributeGroupRisks attributeGroupRisks = attributeGroupRiskRepository.findById(attributeRisk.getAttributeGroupId())
-                    .orElseThrow(() -> new NotFoundException("AttributeGroupRisk not found with id: " + attributeRisk.getAttributeGroupId()));
 
-            LinkResponse linkResponse = attributeGroupRiskMapper.toLinkDTO(attributeGroupRisks);
-            dto.setAttributeGroup(linkResponse);
+            AttributeGroupRisk group = groupRiskMap.get(attributeRisk.getAttributeGroupId());
+            if (group != null) {
+                BasicInfoDTO basicInfoDTO = attributeGroupRiskMapper.toLinkDTO(group);
+                dto.setAttributeGroup(basicInfoDTO);
+            }
+
+            List<AttributeValueRisk> attributeValueRisks = attributeValueRiskRepository.findByAttributeRiskId(attributeRisk.getId());
+            if(!attributeValueRisks.isEmpty() && attributeValueRisks != null) {
+                List<AttributeValueRiskDTO> attributeValueRiskDTOS = new ArrayList<>();
+                for (AttributeValueRisk attributeValueRisk : attributeValueRisks){
+                    AttributeValueRiskDTO attributeValueRiskDTO = new AttributeValueRiskDTO();
+                    attributeValueRiskDTO.setId(attributeValueRisk.getId());
+                    attributeValueRiskDTO.setValue(attributeValueRisk.getValue());
+                    attributeValueRiskDTO.setSortOrder(attributeValueRisk.getSortOrder());
+                    attributeValueRiskDTOS.add(attributeValueRiskDTO);
+                }
+                dto.setRiskAttributeValues(attributeValueRiskDTOS);
+            }
             return dto;
         });
     }
 
     @Override
     public AttributeRiskResponse getAttributeRisk(Long id) {
-        AttributeRisks attributeRisks = attributeRiskRepository.findById(id)
+        AttributeRisk attributeRisk = attributeRiskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("AttributeRisk not found with id: " + id));
 
-        AttributeRiskResponse dto = attributeRiskMapper.toDetailDTO(attributeRisks);
-        AttributeGroupRisks attributeGroupRisks = attributeGroupRiskRepository.findById(attributeRisks.getAttributeGroupId())
-                .orElseThrow(() -> new NotFoundException("AttributeGroupRisk not found with id: " + attributeRisks.getAttributeGroupId()));
+        AttributeRiskResponse dto = attributeRiskMapper.toDetailDTO(attributeRisk);
+        AttributeGroupRisk attributeGroupRisk = attributeGroupRiskRepository.findById(attributeRisk.getAttributeGroupId())
+                .orElseThrow(() -> new NotFoundException("AttributeGroupRisk not found with id: " + attributeRisk.getAttributeGroupId()));
 
-        LinkResponse linkResponse = attributeGroupRiskMapper.toLinkDTO(attributeGroupRisks);
-        dto.setAttributeGroup(linkResponse);
+        BasicInfoDTO basicInfoDTO = attributeGroupRiskMapper.toLinkDTO(attributeGroupRisk);
+        dto.setAttributeGroup(basicInfoDTO);
+
+        List<AttributeValueRisk> attributeValueRisks = attributeValueRiskRepository.findByAttributeRiskId(id);
+        if(!attributeValueRisks.isEmpty() && attributeValueRisks != null) {
+            List<AttributeValueRiskDTO> attributeValueRiskDTOS = new ArrayList<>();
+            for (AttributeValueRisk attributeValueRisk : attributeValueRisks){
+                AttributeValueRiskDTO attributeValueRiskDTO = new AttributeValueRiskDTO();
+                attributeValueRiskDTO.setId(attributeValueRisk.getId());
+                attributeValueRiskDTO.setValue(attributeValueRisk.getValue());
+                attributeValueRiskDTO.setSortOrder(attributeValueRisk.getSortOrder());
+                attributeValueRiskDTOS.add(attributeValueRiskDTO);
+            }
+            dto.setRiskAttributeValues(attributeValueRiskDTOS);
+        }
+
         return dto;
     }
 
@@ -110,7 +149,7 @@ public class AttributeRisksServiceImpl implements AttributeRisksService {
     public void delete(Long id) {
         // Kiểm tra tồn tại
         if (!attributeRiskRepository.existsById(id)) {
-            throw new RuntimeException("attributeRisk not found with id: " + id);
+            throw new NotFoundException("attributeRisk not found with id: " + id);
         }
         // Xóa mapping trước
         attributeValueRiskRepository.deleteByAttributeRiskId(id);
@@ -122,7 +161,7 @@ public class AttributeRisksServiceImpl implements AttributeRisksService {
     @Override
     @Transactional
     public Long update(AttributeRiskUpdateDTO request) {
-        AttributeRisks attributeRisks = attributeRiskRepository.findById(request.getId())
+        AttributeRisk attributeRisk = attributeRiskRepository.findById(request.getId())
                 .orElseThrow(() -> new NotFoundException("AttributeRisk not found with id: " + request.getId()));
 
         // check trùng tên
@@ -135,30 +174,30 @@ public class AttributeRisksServiceImpl implements AttributeRisksService {
             request.setType(TypeAttributeGroup.BUSINESS);
         }
 
-        attributeRiskMapper.updateAttributeRiskUpdateDTO(request, attributeRisks);
+        attributeRiskMapper.updateAttributeRiskUpdateDTO(request, attributeRisk);
 
         // xử lý dataType & value theo displayType
-        if (request.getDisplayType().equals(DisplayType.TEXTBOX) || request.getDisplayType().equals(DisplayType.CHECKBOX)) {
-            attributeRisks.setDataType(request.getDataType());
+        if (request.getDisplayType().equals(DisplayType.TEXTBOX)) {
+            attributeRisk.setDataType(request.getDataType());
             // xóa value nếu trước đó có
-            attributeValueRiskRepository.deleteByAttributeRiskId(attributeRisks.getId());
-        } else if (request.getDisplayType().equals(DisplayType.SELECTBOX)) {
-            attributeRisks.setDataType(null); // clear
+            attributeValueRiskRepository.deleteByAttributeRiskId(attributeRisk.getId());
+        } else {
+            attributeRisk.setDataType(null); // clear
             // clear value cũ
-            attributeValueRiskRepository.deleteByAttributeRiskId(attributeRisks.getId());
+            attributeValueRiskRepository.deleteByAttributeRiskId(attributeRisk.getId());
             // insert value mới
             if (request.getValues() != null) {
                 int sort = 1;
                 for (String v : request.getValues()) {
-                    AttributeValueRisks val = new AttributeValueRisks();
-                    val.setAttributeRiskId(attributeRisks.getId());
+                    AttributeValueRisk val = new AttributeValueRisk();
+                    val.setAttributeRiskId(attributeRisk.getId());
                     val.setValue(v);
                     val.setSortOrder(sort++);
                     attributeValueRiskRepository.save(val);
                 }
             }
         }
-        attributeRiskRepository.save(attributeRisks);
-        return attributeRisks.getId();
+        attributeRiskRepository.save(attributeRisk);
+        return attributeRisk.getId();
     }
 }

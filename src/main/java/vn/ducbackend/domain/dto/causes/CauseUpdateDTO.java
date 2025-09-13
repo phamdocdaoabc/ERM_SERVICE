@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.ducbackend.domain.enums.SourceCause;
+import vn.ducbackend.domain.enums.Source;
 import vn.ducbackend.domain.enums.TypeCause;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class CauseUpdateDTO {
 
     private TypeCause type;
 
-    private SourceCause source;
+    private Source source;
 
     private Long causeCategoryId;
 

@@ -4,17 +4,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.ducbackend.domain.entity.AttributeGroupRisks;
+import vn.ducbackend.domain.entity.AttributeGroupRisk;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Repository
-public interface AttributeGroupRiskRepository extends JpaRepository<AttributeGroupRisks, Long> {
+public interface AttributeGroupRiskRepository extends JpaRepository<AttributeGroupRisk, Long> {
 
     boolean existsAttributeGroupRisksByCodeOrName(String code, String name);
 
-    Page<AttributeGroupRisks> findByIdIn(Set<Long> ids, Pageable pageable);
+    Page<AttributeGroupRisk> findByIdIn(Set<Long> ids, Pageable pageable);
 
     boolean existsByNameAndIdNot(String name, Long id);
+
+    List<AttributeGroupRisk> findByIdIn(Set<Long> ids);
 }

@@ -1,14 +1,13 @@
 package vn.ducbackend.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import vn.ducbackend.domain.ApiResponse;
-import vn.ducbackend.exception.customException.DuplicateException;
-import vn.ducbackend.exception.customException.NotFoundException;
-import vn.ducbackend.exception.customException.ValidationException;
+import vn.ducbackend.exception.customException.*;
 
 import java.util.UUID;
 
@@ -70,6 +69,45 @@ public class GlobalExceptionHandler {
                                 .code("ERROR.INVALID")
                                 .message(errorMessage)
                                 .build())
+                        .build());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse<Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT) // 409
+                .body(ApiErrorResponse.builder()
+                        .message("Duplicate key or constraint violation")
+                        .traceId(UUID.randomUUID().toString())
+                        .errorCodes(ErrorDetail.builder()
+                                .code("DUPLICATE_KEY")
+                                .message(ex.getMostSpecificCause().getMessage()) // lấy chi tiết DB trả về
+                                .build())
+                        .build());
+    }
+
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<ApiErrorResponse<Object>> handleFileStorage(FileStorageException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.builder()
+                        .message("File error")
+                        .errorCodes(ErrorDetail.builder()
+                                .code("FILE_UPLOAD_ERROR")
+                                .message(ex.getMessage())
+                                .build())
+                        .traceId(UUID.randomUUID().toString())
+                        .build());
+    }
+
+    @ExceptionHandler(CloudinaryException.class)
+    public ResponseEntity<ApiErrorResponse<Object>> handleCloudinary(CloudinaryException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiErrorResponse.builder()
+                        .message("Cloudinary upload error")
+                        .errorCodes(ErrorDetail.builder()
+                                .code("CLOUDINARY_ERROR")
+                                .message(ex.getMessage())
+                                .build())
+                        .traceId(UUID.randomUUID().toString())
                         .build());
     }
 }

@@ -27,7 +27,6 @@ public class RiskCategoryController {
 
     private final RiskCategoryService riskCategoryService;
 
-    // API tạo mới cause category
     @PostMapping
     ApiResponse<IdsResponse<Long>> create(@RequestBody @Valid RiskCategoryRequest request) {
         return ApiResponse.<IdsResponse<Long>>builder()
@@ -40,16 +39,16 @@ public class RiskCategoryController {
                 .build();
     }
 
-    // API lấy chi tiết risk category theo id
     @GetMapping()
     ApiResponse<RiskCategoryDetailResponse> getRiskCategory(@RequestParam Long id) {
         RiskCategoryDetailResponse response = riskCategoryService.getRiskCategory(id);
         return ApiResponse.<RiskCategoryDetailResponse>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
 
-    // API list all cause category
     // Nhận tham số phân trang từ request (page, size, sort)
     @GetMapping("/list")
     public ApiResponse<PageResponse<RiskCategoryDetailResponse>> getListRiskCategory(
@@ -69,6 +68,8 @@ public class RiskCategoryController {
                 .build();
 
         return ApiResponse.<PageResponse<RiskCategoryDetailResponse>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -91,6 +92,8 @@ public class RiskCategoryController {
     ApiResponse<String> delete(@RequestParam Long id) {
         riskCategoryService.delete(id);
         return ApiResponse.<String>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data("Delete Cause Category Scuccessfully")
                 .build();
     }

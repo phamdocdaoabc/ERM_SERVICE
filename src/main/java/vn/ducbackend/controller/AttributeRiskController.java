@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import vn.ducbackend.domain.ApiResponse;
 import vn.ducbackend.domain.IdsResponse;
 import vn.ducbackend.domain.PageResponse;
-import vn.ducbackend.domain.dto.AttributeGroupRiskDTO;
-import vn.ducbackend.domain.dto.AttributeRiskRequest;
-import vn.ducbackend.domain.dto.AttributeRiskResponse;
-import vn.ducbackend.domain.dto.AttributeRiskUpdateDTO;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskRequest;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskResponse;
+import vn.ducbackend.domain.dto.attributeRisk.AttributeRiskUpdateDTO;
 import vn.ducbackend.service.AttributeRisksService;
 
 import java.util.Set;
@@ -28,7 +27,6 @@ public class AttributeRiskController {
 
     private final AttributeRisksService attributeRiskService;
 
-    // API tạo mới cause category
     @PostMapping
     ApiResponse<IdsResponse<Long>> create(@RequestBody @Valid AttributeRiskRequest request) {
         return ApiResponse.<IdsResponse<Long>>builder()
@@ -41,16 +39,16 @@ public class AttributeRiskController {
                 .build();
     }
 
-    // API lấy chi tiết risk category theo id
     @GetMapping()
     ApiResponse<AttributeRiskResponse> getAttributeRisk(@RequestParam Long id) {
         AttributeRiskResponse response = attributeRiskService.getAttributeRisk(id);
         return ApiResponse.<AttributeRiskResponse>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
 
-    // API list all cause category
     // Nhận tham số phân trang từ request (page, size, sort)
     @GetMapping("/list")
     public ApiResponse<PageResponse<AttributeRiskResponse>> getListAttributeRisk(
@@ -70,6 +68,8 @@ public class AttributeRiskController {
                 .build();
 
         return ApiResponse.<PageResponse<AttributeRiskResponse>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -78,6 +78,8 @@ public class AttributeRiskController {
     ApiResponse<String> delete(@RequestParam Long id) {
         attributeRiskService.delete(id);
         return ApiResponse.<String>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data("Delete Cause Category Scuccessfully")
                 .build();
     }

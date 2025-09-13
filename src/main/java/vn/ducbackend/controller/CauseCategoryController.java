@@ -14,7 +14,6 @@ import vn.ducbackend.domain.PageResponse;
 import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailRequest;
 import vn.ducbackend.domain.dto.causesCategory.CauseCategoryDetailResponse;
 import vn.ducbackend.domain.dto.causesCategory.CauseCategorySearchRequest;
-import vn.ducbackend.domain.dto.causesCategory.CauseCategoryUpdateDTO;
 import vn.ducbackend.service.CauseCategoryService;
 
 import java.util.Set;
@@ -46,6 +45,8 @@ public class CauseCategoryController {
     ApiResponse<CauseCategoryDetailResponse> getCauseCategory(@RequestParam Long id) {
         CauseCategoryDetailResponse response = causeCategoryService.getCauseCategory(id);
         return ApiResponse.<CauseCategoryDetailResponse>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -70,6 +71,8 @@ public class CauseCategoryController {
                 .build();
 
         return ApiResponse.<PageResponse<CauseCategoryDetailResponse>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
@@ -77,7 +80,7 @@ public class CauseCategoryController {
 
     // API chỉnh sửa
     @PutMapping
-    ApiResponse<IdsResponse<Long>> update(@RequestBody @Valid CauseCategoryUpdateDTO request) {
+    ApiResponse<IdsResponse<Long>> update(@RequestBody @Valid CauseCategoryDetailRequest request) {
         return ApiResponse.<IdsResponse<Long>>builder()
                 .message("Successfully")
                 .traceId(UUID.randomUUID().toString())
@@ -92,6 +95,8 @@ public class CauseCategoryController {
     ApiResponse<String> delete(@RequestParam Long id) {
         causeCategoryService.delete(id);
         return ApiResponse.<String>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data("Delete Cause Category Scuccessfully")
                 .build();
     }
@@ -121,8 +126,9 @@ public class CauseCategoryController {
                 .build();
 
         return ApiResponse.<PageResponse<CauseCategoryDetailResponse>>builder()
+                .message("Successfully")
+                .traceId(UUID.randomUUID().toString()) // chuỗi UUID random
                 .data(response)
                 .build();
     }
-
 }

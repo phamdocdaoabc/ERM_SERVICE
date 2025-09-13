@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.ducbackend.domain.dto.LinkResponse;
+import vn.ducbackend.domain.dto.BasicInfoDTO;
 
 import java.util.List;
 
@@ -18,5 +18,5 @@ public class CauseCategoryDetailResponse {
     private String name;
     private String description;
     private String note;
-    private List<LinkResponse> systemIds;
+    private List<BasicInfoDTO> systemIds;
 }
